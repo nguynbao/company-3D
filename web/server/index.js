@@ -28,17 +28,24 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Phục vụ trực tiếp thư mục assets/ (chứa hình ảnh sản phẩm gốc, poster, video của CEO)
-const ASSETS_DIR = path.join(ROOT_DIR, 'assets');
-fs.mkdirSync(ASSETS_DIR, { recursive: true });
-app.use('/assets', express.static(ASSETS_DIR));
+// Phục vụ trực tiếp thư mục web/public/assets/ (độc lập cho Vercel) & đồng bộ với root assets/
+const PUBLIC_ASSETS_DIR = path.join(__dirname, '..', 'public', 'assets');
+const ROOT_ASSETS_DIR = path.join(ROOT_DIR, 'assets');
+const ASSETS_DIR = PUBLIC_ASSETS_DIR;
+fs.mkdirSync(PUBLIC_ASSETS_DIR, { recursive: true });
+fs.mkdirSync(ROOT_ASSETS_DIR, { recursive: true });
+app.use('/assets', express.static(PUBLIC_ASSETS_DIR));
+app.use('/assets', express.static(ROOT_ASSETS_DIR));
 
-// Lấy danh sách file hình ảnh / video hiện có trong thư mục assets/
+// Lấy danh sách file hình ảnh / video hiện có trong thư mục web/public/assets/
 app.get('/api/assets/list', (req, res) => {
   try {
-    const files = fs.readdirSync(ASSETS_DIR);
+    const fileSet = new Set([
+      ...(fs.existsSync(PUBLIC_ASSETS_DIR) ? fs.readdirSync(PUBLIC_ASSETS_DIR) : []),
+      ...(fs.existsSync(ROOT_ASSETS_DIR) ? fs.readdirSync(ROOT_ASSETS_DIR) : []),
+    ]);
     const media = [];
-    for (const file of files) {
+    for (const file of fileSet) {
       const ext = path.extname(file).toLowerCase();
       const isImage = ['.png', '.jpg', '.jpeg', '.webp', '.gif'].includes(ext);
       const isVideo = ['.mp4', '.mov', '.webm', '.m4v'].includes(ext);
@@ -58,7 +65,7 @@ app.get('/api/assets/list', (req, res) => {
   }
 });
 
-// Upload file hình ảnh hoặc video mới từ CEO / Agent DESIGN vào thư mục assets/
+// Upload file hình ảnh hoặc video mới từ CEO / Agent DESIGN vào web/public/assets/ (và đồng bộ sang root assets/)
 app.post('/api/assets/upload', (req, res) => {
   try {
     const { fileName, dataUrl, keepExactName } = req.body;
@@ -74,8 +81,12 @@ app.post('/api/assets/upload', (req, res) => {
     }
     const mimeType = base64Match[1];
     const buffer = Buffer.from(base64Match[2], 'base64');
-    const targetPath = path.join(ASSETS_DIR, finalName);
-    fs.writeFileSync(targetPath, buffer);
+    fs.writeFileSync(path.join(PUBLIC_ASSETS_DIR, finalName), buffer);
+    try {
+      fs.writeFileSync(path.join(ROOT_ASSETS_DIR, finalName), buffer);
+    } catch {
+      // ignore if root assets is read-only
+    }
 
     const isVideo = mimeType.startsWith('video/');
     const payload = {
