@@ -1,0 +1,108 @@
+{
+  "_huong_dan": {
+    "cach_1_dung_antigravity_co_san": "Đặt 'provider': 'antigravity', 'model' chọn: 'pro', 'flash', 'flash_lite', hoặc 'inherit' (dùng theo model bạn đang chọn trên thanh Model của Antigravity như Claude/Gemini, không tốn thêm API key ngoài).",
+    "cach_2_dung_openai_claude_deepseek": "Đặt 'provider' là 'openai' | 'anthropic' | 'deepseek' | 'openrouter' và điền tên model bất kỳ (VD: 'gpt-4o', 'claude-3-7-sonnet-latest', 'deepseek-chat', 'deepseek-reasoner') kèm API key trong file .env"
+  },
+  "departments": {
+    "MKT-DIRECTOR": {
+      "role": "Phòng Điều Phối Marketing",
+      "provider": "antigravity",
+      "model": "pro",
+      "external_example": { "provider": "openai", "model": "gpt-4o" },
+      "active": true,
+      "agent_file": ".agent/agents/01-mkt-director.md",
+      "skills": [
+        ".agent/skills/mkt-director/SKILL.md"
+      ]
+    },
+    "PLANNER": {
+      "role": "Phòng Chiến Lược & Kế Hoạch",
+      "provider": "antigravity",
+      "model": "pro",
+      "external_example": { "provider": "deepseek", "model": "deepseek-reasoner" },
+      "active": true,
+      "agent_file": ".agent/agents/02-planner.md",
+      "skills": [
+        ".agent/skills/planner/SKILL.md"
+      ]
+    },
+    "RESEARCH": {
+      "role": "Phòng Nghiên Cứu & Phân Tích",
+      "provider": "antigravity",
+      "model": "flash",
+      "external_example": { "provider": "deepseek", "model": "deepseek-chat" },
+      "active": true,
+      "agent_file": ".agent/agents/03-research.md",
+      "skills": [
+        ".agent/skills/research/SKILL.md"
+      ]
+    },
+    "CONTENT": {
+      "role": "Phòng Nội Dung",
+      "provider": "antigravity",
+      "model": "pro",
+      "external_example": { "provider": "anthropic", "model": "claude-3-7-sonnet-latest" },
+      "active": true,
+      "agent_file": ".agent/agents/04-content.md",
+      "skills": [
+        ".agent/skills/content/SKILL.md"
+      ]
+    },
+    "DESIGN": {
+      "role": "Phòng Thiết Kế Đồ Họa",
+      "provider": "antigravity",
+      "model": "flash",
+      "external_example": { "provider": "openai", "model": "gpt-4o" },
+      "active": true,
+      "agent_file": ".agent/agents/05-design.md",
+      "skills": [
+        ".agent/skills/design/SKILL.md"
+      ]
+    },
+    "VIDEO": {
+      "role": "Phòng Sản Xuất Video",
+      "provider": "antigravity",
+      "model": "flash",
+      "external_example": { "provider": "openai", "model": "gpt-4o-mini" },
+      "active": false,
+      "activation_policy": "on_demand_only",
+      "agent_file": ".agent/agents/06-video.md",
+      "skills": [
+        ".agent/skills/video/SKILL.md"
+      ]
+    },
+    "OPS": {
+      "role": "Phòng Vận Hành & Đăng Bài",
+      "provider": "antigravity",
+      "model": "flash_lite",
+      "external_example": { "provider": "deepseek", "model": "deepseek-chat" },
+      "active": true,
+      "agent_file": ".agent/agents/07-ops.md",
+      "skills": [
+        ".agent/skills/ops/SKILL.md"
+      ]
+    },
+    "COMMUNITY": {
+      "role": "Phòng Cộng Đồng & CSKH",
+      "provider": "antigravity",
+      "model": "flash",
+      "external_example": { "provider": "anthropic", "model": "claude-3-5-haiku-latest" },
+      "active": true,
+      "agent_file": ".agent/agents/08-community.md",
+      "skills": [
+        ".agent/skills/community/SKILL.md"
+      ]
+    },
+    "QA-QC": {
+      "role": "Phòng Kiểm Soát Chất Lượng",
+      "provider": "antigravity",
+      "model": "pro",
+      "external_example": { "provider": "openai", "model": "gpt-4o" },
+      "active": true,
+      "agent_file": ".agent/agents/09-qa-qc.md",
+      "skills": [
+        ".agent/skills/qa-qc/SKILL.md"
+      ]
+    }
+  }
+}

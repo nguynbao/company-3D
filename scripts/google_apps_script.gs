@@ -1,0 +1,263 @@
+/**
+ * GOOGLE APPS SCRIPT - CHUẨN HÓA DATABASE CHO N8N & HIỂN THỊ HÌNH ẢNH TRỰC TIẾP CHO CEO
+ * Đặc điểm thiết kế chuẩn n8n:
+ * 1. Mỗi dòng là 1 bản ghi (record) phẳng 100% — TUYỆT ĐỐI KHÔNG chèn dòng tiêu đề giả hay dòng trống.
+ * 2. Tất cả 9 Sheets đều có cột khóa ngoại `Ma_Chien_Dich` ở đầu để n8n lọc (Filter) theo chiến dịch dễ dàng.
+ * 3. Tách riêng cột `Hinh_Anh_Preview` (công thức =IMAGE hiển thị ảnh cho CEO) và cột `Link_Anh_N8N` (URL sạch https://... cho n8n).
+ * 4. Sheet `Bao_Cao_Cho_CEO`: Mỗi chiến dịch đúng 1 dòng duy nhất, có sẵn các cột hiển thị trực tiếp 4 ảnh thiết kế + 1 ảnh gốc.
+ * 5. Phân biệt giữa các chiến dịch bằng Màu nền (Color Banding theo Ma_Chien_Dich) và Đường kẻ viền đậm (Thick Border)
+ *    giữa 2 chiến dịch khác nhau -> Nhìn mắt thường cực rõ mà không làm hỏng cấu trúc bảng của n8n!
+ */
+
+const SHEETS_SCHEMA = {
+  "Brief_Tong_Quan": [
+    "Ma_Chien_Dich", "Ten_Chien_Dich", "Muc_Tieu", "San_Pham", "Dip_Chu_De",
+    "Nen_Tang", "KPI", "Deadline", "Ngan_Sach", "Gia_Dinh", "Can_CEO_Xac_Nhan",
+    "Anh_San_Pham_Preview", "Link_Anh_San_Pham_N8N"
+  ],
+  "Phan_Cong_Nhiem_Vu": [
+    "Ma_Chien_Dich", "Ma_Nhiem_Vu", "Phong_Ban", "Nhan_Vien_Phu_Trach", "Mo_Ta_Nhiem_Vu",
+    "Dau_Vao", "Dau_Ra", "Deadline", "Uu_Tien", "Trang_Thai", "Phu_Thuoc", "Ghi_Chu"
+  ],
+  "Ke_Hoach_Chien_Dich": [
+    "Ma_Chien_Dich", "Giai_Doan", "Thoi_Gian", "Muc_Tieu_Giai_Doan", "Thong_Diep",
+    "Kenh", "Dinh_Dang", "Phong_Ban_Phu_Trach", "KPI"
+  ],
+  "Noi_Dung_Bai_Dang": [
+    "Ma_Chien_Dich", "Ma_Bai", "Nen_Tang", "Dinh_Dang", "Tieu_De_Hook",
+    "Caption_Hoan_Chinh", "Hashtag", "CTA", "Hinh_Anh_Preview", "Link_Anh_N8N",
+    "Ma_Thiet_Ke", "Ma_Video", "Ngay_Dang", "Gio_Dang", "Trang_Thai"
+  ],
+  "Brief_Thiet_Ke": [
+    "Ma_Chien_Dich", "Ma_Thiet_Ke", "Loai", "Nen_Tang", "Kich_Thuoc",
+    "Noi_Dung_Chu_Tren_Anh", "Bo_Cuc", "Mau_Sac_Font", "Prompt_Tao_Anh",
+    "Hinh_Anh_Preview", "Link_Anh_N8N", "Deadline", "Trang_Thai"
+  ],
+  "Kich_Ban_Dung_Video": [
+    "Ma_Chien_Dich", "Ma_Video", "Phan_Doan", "Timecode_Bat_Dau", "Timecode_Ket_Thuc",
+    "Anh_Nguon_Preview", "Link_Nguon_N8N", "Cat_Tu_Den", "Hieu_Ung_Transition",
+    "Chu_Phu_De", "Nhac_Am_Thanh", "Ty_Le", "Ten_File_Xuat", "Nhan_Vien_Phu_Trach", "Trang_Thai"
+  ],
+  "Lich_Dang_Bai": [
+    "Ma_Chien_Dich", "Ngay", "Gio", "Nen_Tang", "Ma_Bai",
+    "Ma_Thiet_Ke", "Ma_Video", "Hinh_Anh_Preview", "Link_Anh_N8N", "Nguoi_Dang", "Trang_Thai"
+  ],
+  "QA_QC_Log": [
+    "Ma_Chien_Dich", "Ma_Kiem_Tra", "Doi_Tuong_Kiem_Tra", "Phong_Ban_Bi_Kiem_Tra", "Hang_Muc",
+    "Ket_Qua", "Diem", "Loi_Cu_The", "Huong_Sua", "Vong_Kiem_Tra", "Nguoi_Kiem_Tra", "Trang_Thai"
+  ],
+  "Bao_Cao_Cho_CEO": [
+    "Ma_Chien_Dich", "Tong_Quan_Ket_Qua", "Hang_Muc_Da_Xong", "Hang_Muc_Cho_CEO_Duyet",
+    "Rui_Ro", "De_Xuat_Tiep_Theo",
+    "Anh_Goc_Preview", "Anh_Thiet_Ke_1", "Anh_Thiet_Ke_2", "Anh_Thiet_Ke_3",
+    "Anh_Thiet_Ke_4", "Anh_Thiet_Ke_5", "Anh_Thiet_Ke_6",
+    "Link_Anh_N8N"
+  ]
+};
+
+const COLUMN_WIDTHS = {
+  "Caption_Hoan_Chinh": 420,
+  "Prompt_Tao_Anh": 380,
+  "Mo_Ta_Nhiem_Vu": 340,
+  "Noi_Dung_Chu_Tren_Anh": 340,
+  "Tong_Quan_Ket_Qua": 340,
+  "Hang_Muc_Da_Xong": 320,
+  "Hang_Muc_Cho_CEO_Duyet": 320,
+  "De_Xuat_Tiep_Theo": 320,
+  "Chu_Phu_De": 320,
+  "Thong_Diep": 320,
+  "Muc_Tieu": 300,
+  "Muc_Tieu_Giai_Doan": 300,
+  "Gia_Dinh": 300,
+  "Can_CEO_Xac_Nhan": 300,
+  "Loi_Cu_The": 300,
+  "Huong_Sua": 300,
+  "Bo_Cuc": 280,
+  "Tieu_De_Hook": 280,
+  "Hashtag": 260,
+  "CTA": 250,
+  "Link_Anh_N8N": 240,
+  "Link_Anh_San_Pham_N8N": 240,
+  "Link_Nguon_N8N": 240,
+  "Hinh_Anh_Preview": 180,
+  "Anh_San_Pham_Preview": 180,
+  "Anh_Nguon_Preview": 180,
+  "Anh_Goc_Preview": 180,
+  "Anh_Thiet_Ke_1": 180,
+  "Anh_Thiet_Ke_2": 180,
+  "Anh_Thiet_Ke_3": 180,
+  "Anh_Thiet_Ke_4": 180,
+  "Anh_Thiet_Ke_5": 180,
+  "Anh_Thiet_Ke_6": 180
+};
+
+const DEFAULT_COL_WIDTH = 170;
+
+// Bảng màu pastel dịu mắt để phân biệt các Chiến dịch khác nhau mà không cần chèn dòng rác
+const CAMPAIGN_COLORS = [
+  "#FFFFFF", // Chiến dịch 1: Trắng sạch
+  "#F0F7FF", // Chiến dịch 2: Xanh dương nhạt
+  "#FFF9F0", // Chiến dịch 3: Cam kem nhạt
+  "#F2FBF4", // Chiến dịch 4: Xanh lá nhạt
+  "#FAF5FF"  // Chiến dịch 5: Tím nhạt
+];
+
+function ensureAllSheetsExist(customSchema) {
+  const schema = customSchema || SHEETS_SCHEMA;
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const createdOrVerified = [];
+
+  for (const [sheetName, headers] of Object.entries(schema)) {
+    let sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+    }
+
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setValues([headers]);
+    headerRange.setBackground("#1a365d");
+    headerRange.setFontColor("#ffffff");
+    headerRange.setFontWeight("bold");
+    headerRange.setFontSize(10);
+    headerRange.setHorizontalAlignment("center");
+    headerRange.setVerticalAlignment("middle");
+    headerRange.setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
+    sheet.setRowHeight(1, 40);
+    sheet.setFrozenRows(1);
+
+    for (let i = 0; i < headers.length; i++) {
+      const colName = headers[i];
+      const width = COLUMN_WIDTHS[colName] || DEFAULT_COL_WIDTH;
+      sheet.setColumnWidth(i + 1, width);
+    }
+
+    createdOrVerified.push(sheetName);
+  }
+
+  return {
+    spreadsheetName: ss.getName(),
+    spreadsheetUrl: ss.getUrl(),
+    sheets: createdOrVerified
+  };
+}
+
+/**
+ * Tô màu phân biệt theo từng Ma_Chien_Dich (Cột A) và kẻ đường viền đậm ngăn cách giữa các chiến dịch,
+ * đồng thời chỉnh chiều cao dòng = 160px cho các dòng có chứa ảnh =IMAGE(...)
+ */
+function styleCampaignGroupsAndImages(sheet, numCols) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return;
+
+  const numDataRows = lastRow - 1;
+  const dataRange = sheet.getRange(2, 1, numDataRows, numCols);
+  const formulas = dataRange.getFormulas();
+  const values = dataRange.getValues();
+
+  dataRange.setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
+  dataRange.setVerticalAlignment("top");
+  dataRange.setFontSize(10);
+
+  let currentCampaign = null;
+  let colorIndex = -1;
+
+  for (let r = 0; r < numDataRows; r++) {
+    const rowNumber = r + 2;
+    const campaignId = String(values[r][0] || "").trim();
+    const rowRange = sheet.getRange(rowNumber, 1, 1, numCols);
+
+    if (campaignId !== currentCampaign) {
+      currentCampaign = campaignId;
+      colorIndex = (colorIndex + 1) % CAMPAIGN_COLORS.length;
+      // Kẻ đường viền trên đậm màu xanh navy ngăn cách rõ ràng khi sang Chiến dịch mới
+      if (r > 0) {
+        rowRange.setBorder(true, null, null, null, null, null, "#1a365d", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+      }
+    }
+
+    rowRange.setBackground(CAMPAIGN_COLORS[colorIndex]);
+
+    // Kiểm tra nếu dòng có công thức =IMAGE(...) thì mở rộng chiều cao dòng lên 165px để ảnh hiện to rõ
+    const hasImageFormula = formulas[r].some(f => f && f.toUpperCase().indexOf("=IMAGE(") === 0);
+    if (hasImageFormula) {
+      sheet.setRowHeight(rowNumber, 165);
+    }
+  }
+}
+
+function doGet(e) {
+  try {
+    const info = ensureAllSheetsExist();
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "ok",
+      message: "Đã cập nhật cấu trúc chuẩn n8n + hiển thị ảnh trực tiếp!",
+      data: info
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    const payload = JSON.parse(e.postData.contents);
+    const activeSchema = payload.schema || SHEETS_SCHEMA;
+    const info = ensureAllSheetsExist(activeSchema);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const mode = payload.mode || "append";
+    const campaignIdToUpdate = payload.campaignId || null;
+    const sheetsData = payload.sheets || {};
+    const summary = {};
+
+    for (const [sheetName, rows] of Object.entries(sheetsData)) {
+      if (!activeSchema[sheetName] || !Array.isArray(rows)) continue;
+      const sheet = ss.getSheetByName(sheetName);
+      const expectedCols = activeSchema[sheetName].length;
+
+      if (mode === "replace" && sheet.getLastRow() > 1) {
+        sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getMaxColumns()).clearContent();
+        sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getMaxColumns()).setBorder(false, false, false, false, false, false);
+      } else if (mode === "upsert_campaign" && campaignIdToUpdate && sheet.getLastRow() > 1) {
+        // Xóa đúng các dòng cũ của cùng Ma_Chien_Dich để cập nhật không bị trùng lặp
+        const lastR = sheet.getLastRow();
+        const colA = sheet.getRange(2, 1, lastR - 1, 1).getValues();
+        for (let i = colA.length - 1; i >= 0; i--) {
+          if (String(colA[i][0]).trim() === campaignIdToUpdate) {
+            sheet.deleteRow(i + 2);
+          }
+        }
+      }
+
+      const normalizedRows = rows
+        .filter(r => Array.isArray(r) && r.length > 0 && r[0] !== activeSchema[sheetName][0])
+        .map(r => {
+          const rowCopy = r.slice(0, expectedCols);
+          while (rowCopy.length < expectedCols) rowCopy.push("");
+          return rowCopy;
+        });
+
+      if (normalizedRows.length > 0) {
+        const startRow = sheet.getLastRow() + 1;
+        const targetRange = sheet.getRange(startRow, 1, normalizedRows.length, expectedCols);
+        targetRange.setValues(normalizedRows);
+        styleCampaignGroupsAndImages(sheet, expectedCols);
+      }
+      summary[sheetName] = normalizedRows.length;
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "ok",
+      message: "Đã đồng bộ dữ liệu chuẩn n8n và hiển thị ảnh thành công!",
+      spreadsheetUrl: info.spreadsheetUrl,
+      rowsWritten: summary
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}

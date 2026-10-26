@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+web/node_modules/
+
+# Build outputs
+dist/
+web/dist/
+*.tsbuildinfo
+web/*.tsbuildinfo
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+.agent/encrypted_keys.vault.json
+*service-account*.json
+credentials.json
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
