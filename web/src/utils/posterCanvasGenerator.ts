@@ -30,6 +30,7 @@ export interface RenderedPosterAsset {
   url: string;
   filePath: string;
   ratio: string;
+  jpegBase64?: string;
 }
 
 function loadImageElement(src: string): Promise<HTMLImageElement | null> {
@@ -590,14 +591,69 @@ export async function generateCampaignPosters(
     ctx.restore();
 
     const uploaded = await uploadCanvasToAssets(canvas, cfg.fileName);
+    const jpegBase64 = canvasToCompressedJpegBase64(canvas, 800);
     results.push({
       code: cfg.code,
       title: cfg.title,
       url: uploaded.url,
       filePath: uploaded.filePath,
       ratio: cfg.ratio,
+      jpegBase64,
     });
   }
 
   return results;
 }
+
+/**
+ * Nén Canvas xuống JPEG ~800px để đồng bộ nhanh lên CDN & Google Sheet khi chạy trên Vercel
+ */
+export function canvasToCompressedJpegBase64(
+  sourceCanvas: HTMLCanvasElement,
+  maxDim = 800
+): string {
+  try {
+    const scale = Math.min(1, maxDim / Math.max(sourceCanvas.width || 1, sourceCanvas.height || 1));
+    const w = Math.max(1, Math.round(sourceCanvas.width * scale));
+    const h = Math.max(1, Math.round(sourceCanvas.height * scale));
+    const thumb = document.createElement('canvas');
+    thumb.width = w;
+    thumb.height = h;
+    const tCtx = thumb.getContext('2d');
+    if (tCtx) {
+      tCtx.fillStyle = '#0F172A';
+      tCtx.fillRect(0, 0, w, h);
+      tCtx.drawImage(sourceCanvas, 0, 0, w, h);
+      const dataUrl = thumb.toDataURL('image/jpeg', 0.84);
+      return dataUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+    }
+  } catch {
+    // fallback
+  }
+  const fallbackUrl = sourceCanvas.toDataURL('image/jpeg', 0.8);
+  return fallbackUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+}
+
+/**
+ * Chuyển đổi ảnh gốc của CEO (URL hoặc DataURL) sang JPEG Base64 nhẹ để đồng bộ lên Google Sheet trên Vercel
+ */
+export async function imageUrlToCompressedJpegBase64(srcUrl?: string): Promise<string | undefined> {
+  if (!srcUrl) return undefined;
+  const img = await loadImageElement(srcUrl);
+  if (!img) return undefined;
+  const maxDim = 800;
+  const scale = Math.min(1, maxDim / Math.max(img.width || 1, img.height || 1));
+  const w = Math.max(1, Math.round((img.width || 600) * scale));
+  const h = Math.max(1, Math.round((img.height || 600) * scale));
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext('2d');
+  if (!ctx) return undefined;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img, 0, 0, w, h);
+  const dataUrl = c.toDataURL('image/jpeg', 0.84);
+  return dataUrl.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
+}
+

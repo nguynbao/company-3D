@@ -24,7 +24,8 @@ import {
   INITIAL_TASKS,
 } from '../data/mockCompanyData';
 import { buildCampaignPackage } from '../utils/campaignGenerator';
-import { generateCampaignPosters } from '../utils/posterCanvasGenerator';
+import { generateCampaignPosters, RenderedPosterAsset } from '../utils/posterCanvasGenerator';
+import { syncCampaignReportDualMode } from '../utils/cloudSheetSync';
 
 const NEW_CAMPAIGN_WELCOME_MSG: ChatMessageItem = {
   id: 'welcome-new-campaign',
@@ -742,6 +743,7 @@ export const useCompanyStore = create<CompanyStore>((set, get) => ({
     // Chạy luồng thực thi từng bước bất đồng bộ để vừa điều khiển nhân vật 3D vừa stream hội thoại vào ô Chat
     (async () => {
       let errorCount = 0;
+      let latestRenderedPosters: RenderedPosterAsset[] = campaignPkg.visualAssets;
 
       for (let idx = 0; idx < involvedDepts.length; idx++) {
         const deptId = involvedDepts[idx];
@@ -863,6 +865,7 @@ export const useCompanyStore = create<CompanyStore>((set, get) => ({
           if (deptId === 'DESIGN') {
             const renderedPosters = await generateCampaignPosters(campaignPkg.posterSpec);
             if (renderedPosters.length === 4) {
+              latestRenderedPosters = renderedPosters;
               campaignPkg = buildCampaignPackage({
                 taskId,
                 revision,
@@ -1053,30 +1056,27 @@ export const useCompanyStore = create<CompanyStore>((set, get) => ({
         );
 
         try {
-          const syncResp = await fetch('/api/tasks/sync-report', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              taskId,
-              markdownContent: campaignPkg.markdownReport,
-            }),
+          const syncResult = await syncCampaignReportDualMode({
+            taskId,
+            markdownContent: campaignPkg.markdownReport,
+            originalProductImageUrl: campaignPkg.posterSpec.productImageUrl,
+            renderedPosters: latestRenderedPosters,
           });
-          const syncData = await syncResp.json().catch(() => ({}));
-          if (syncResp.ok && syncData.ok) {
+          if (syncResult.ok) {
             syncThreadMessages((msgs) =>
               msgs.map((m) =>
                 m.id === finalMsgId
                   ? {
                       ...m,
-                      syncedToSheet: Boolean(syncData.syncedToSheet),
-                      reportFile: syncData.savedReport || `reports/${taskId}.md`,
+                      syncedToSheet: Boolean(syncResult.syncedToSheet),
+                      reportFile: syncResult.savedReport || `reports/${taskId}.md`,
                     }
                   : m
               )
             );
           }
         } catch {
-          // Bỏ qua nếu đang chạy bản tĩnh
+          // Bỏ qua nếu gặp lỗi mạng ngoài ý muốn
         }
       }
 
