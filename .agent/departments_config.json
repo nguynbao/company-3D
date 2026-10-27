@@ -62,7 +62,17 @@
       "activation_policy": "directed_by_mkt_director",
       "agent_file": ".agent/agents/05-design.md",
       "skills": [
-        ".agent/skills/design/SKILL.md"
+        ".agent/skills/design/SKILL.md",
+        ".agent/skills/design/references/image-upscaling/REFERENCE.md",
+        ".agent/skills/design/references/image-enhancer/REFERENCE.md",
+        ".agent/skills/design/references/canvas-design/REFERENCE.md",
+        ".agent/skills/design/references/ai-artist-multimodal/REFERENCE.md",
+        ".agent/skills/design/references/brand-guidelines/REFERENCE.md",
+        ".agent/skills/design/references/frontend-design/REFERENCE.md",
+        ".agents/skills/banner-design/SKILL.md",
+        ".agents/skills/brand/SKILL.md",
+        ".agents/skills/design-system/SKILL.md",
+        ".agents/skills/ui-ux-pro-max/SKILL.md"
       ]
     },
     "VIDEO": {
@@ -74,7 +84,14 @@
       "activation_policy": "on_demand_only_by_mkt_director",
       "agent_file": ".agent/agents/06-video.md",
       "skills": [
-        ".agent/skills/video/SKILL.md"
+        ".agent/skills/video/SKILL.md",
+        ".agent/skills/video/references/ffmpeg-skill/REFERENCE.md",
+        ".agent/skills/video/references/remotion-motion-graphics/REFERENCE.md",
+        ".agent/skills/video/references/remotion-skills/remotion-best-practices/REFERENCE.md",
+        ".agent/skills/video/references/remotion-skills/remotion-captions/REFERENCE.md",
+        ".agent/skills/video/references/remotion-skills/remotion-render/REFERENCE.md",
+        ".agent/skills/design/references/image-upscaling/REFERENCE.md",
+        ".agent/skills/design/references/image-enhancer/REFERENCE.md"
       ]
     },
     "OPS": {
