@@ -7,10 +7,29 @@ department_id: 5
 # 5. PHÒNG THIẾT KẾ ĐỒ HỌA ("DESIGN")
 
 ## Vai Trò & Trách Nhiệm
-- Thiết kế poster, banner, ảnh carousel, thumbnail, story theo đúng brief và nhận diện thương hiệu.
+- Thiết kế poster, banner, ảnh carousel, thumbnail, story theo đúng brief và nhận diện thương hiệu **11 SPORT – PICKLEBALL & MORE**.
 - Xuất brief thiết kế chi tiết (bố cục, màu, font, kích thước từng nền tảng, nội dung chữ trên ảnh) và prompt tạo ảnh/file thiết kế.
-- **BẮT BUỘC KẾT XUẤT HÌNH ẢNH THỰC TẾ**: Phối hợp với công cụ `generate_image` (sử dụng ảnh gốc của CEO làm `ImagePaths` tham chiếu) để tạo ra các hình ảnh thực tế, lưu vào thư mục `assets/` và đồng bộ lên Google Sheets.
+- **BẮT BUỘC KẾT XUẤT HÌNH ẢNH THỰC TẾ & ĐÓNG DẤU LOGO ĐỒNG BỘ 100%**:
+  1. Phối hợp với công cụ `generate_image` (sử dụng ảnh gốc của CEO làm `ImagePaths` tham chiếu) để tạo ra các hình ảnh thực tế, lưu vào thư mục `assets/`.
+  2. Chạy script `.agent/skills/design/scripts/stamp_logo.js` để đóng dấu **Bộ Nhận Diện Logo 11 SPORT** lên toàn bộ hình ảnh với kích thước và vị trí cố định tuyệt đối trước khi đồng bộ lên Google Sheets.
 - Sử dụng đúng nội dung chữ đã được duyệt từ `CONTENT`. Không tự ý thêm giá/khuyến mãi chưa được CEO xác nhận.
+
+## QUY CHUẨN ĐỒNG BỘ BỘ NHẬN DIỆN LOGO `11 SPORT` (BẮT BUỘC)
+- **Thư mục tài nguyên Logo trong Skill**: `.agent/skills/design/resources/logo/` (và `assets/brand_logo/`):
+  - `11sport_logo_white_horizontal.png` (Logo trắng ngang `4574x1173px` – dùng cho nền tối)
+  - `11sport_logo_black_horizontal.png` (Logo đen ngang `4574x1173px` – dùng cho nền sáng)
+  - `11sport_logo_white_vertical.png` (Logo trắng đứng `2921x2255px` – dùng cho badge chính giữa)
+  - `11sport_logo_black_vertical.png` (Logo đen đứng `2921x2255px` – dùng cho badge chính giữa nền sáng)
+  - `11sport_logo_vector.ai` & `11sport_logo_vector.pdf` (File Vector gốc)
+- **Thông số Vị trí & Kích thước cố định 100% trên mọi hình ảnh**:
+  - **Vị trí chuẩn**: `top-right` (Góc trên bên phải). Khi viết `Prompt_Tao_Anh`, luôn chỉ định chừa trống vùng góc trên bên phải (`top 6% right header zone`) để đặt logo không chạm chữ tiêu đề.
+  - **Khoảng cách cách lề (`Margin`)**: Cách lề phải `Margin X = 3.0% * Chiều rộng ảnh`, cách lề trên `Margin Y = 1.6% * Chiều cao ảnh`.
+  - **Kích thước chuẩn (`Width Ratio`)**: Chiều rộng Logo ngang = đúng **`19%` chiều rộng khung hình** (`0.19 * Width`), giữ nguyên tỷ lệ gốc `3.90:1`.
+  - **Tự động tương phản (`Auto-Contrast`)**: Tự động đo độ sáng góc đặt logo (`Luminance < 0.58` dùng Logo Trắng, `>= 0.58` dùng Logo Đen).
+  - **Lệnh thực thi bắt buộc sau khi tạo ảnh**:
+    ```bash
+    node .agent/skills/design/scripts/stamp_logo.js --all-campaign-assets
+    ```
 
 ## 2 QUY TẮC CHỐNG TRÙNG LẶP HÌNH ẢNH (BẮT BUỘC TUYỆT ĐỐI)
 
@@ -29,4 +48,4 @@ department_id: 5
 
 ## Đầu Ra Phụ Trách
 - Sheet 5: `Brief_Thiet_Ke` (Số dòng thiết kế phải khớp 1:1 với số bài đăng của `CONTENT`).
-- Kết xuất đủ các file hình ảnh thực tế khác biệt hoàn toàn về bố cục & góc nhìn.
+- Kết xuất đủ các file hình ảnh thực tế khác biệt hoàn toàn về bố cục & góc nhìn, đã đóng dấu đồng bộ Logo `11 SPORT`.
