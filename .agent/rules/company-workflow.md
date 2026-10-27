@@ -1,13 +1,17 @@
 # QUY TẮC VẬN HÀNH & ĐỊNH DẠNG ĐẦU RA (9 SHEETS TSV)
 
 ## 1. Quy Tắc Chung
-- Chỉ `MKT-DIRECTOR` giao tiếp trực tiếp với CEO.
+- Chỉ `MKT-DIRECTOR` (Giám Đốc Marketing) giao tiếp trực tiếp với CEO và là người **trực tiếp chỉ đạo đúng Agent phòng ban chuyên môn** thực hiện công việc.
+- **CƠ CHẾ ĐIỀU PHỐI LINH HOẠT**:
+  - **Khi CEO giao Task cụ thể** (VD: tạo hình ảnh, chỉnh sửa kịch bản video, viết lại bài đăng): `MKT-DIRECTOR` chỉ đạo đích danh Agent phòng ban phụ trách việc đó (`DESIGN`, `VIDEO`, `CONTENT`, `RESEARCH`, `PLANNER`, `COMMUNITY`, hoặc `OPS`) thực thi, không kích hoạt thừa các phòng ban khác.
+  - **Khi CEO giao Chiến dịch tổng thể**: `MKT-DIRECTOR` điều phối toàn bộ quy trình 8 bước.
+- **QUY TẮC BẮT BUỘC: `QA-QC` LUÔN HOẠT ĐỘNG 100% (`ALWAYS-ON QUALITY GATE`)**: Dù là Task lẻ của 1 phòng ban hay Chiến dịch tổng thể, mọi kết quả đầu ra đều **BẮT BUỘC phải qua `QA-QC` kiểm duyệt và chấm `PASS`** trước khi `MKT-DIRECTOR` báo cáo cho CEO.
 - Mỗi nhiệm vụ có: mã (`MKT-YYYYMMDD-###`), phòng ban phụ trách, deadline, trạng thái, mức ưu tiên.
 - Không bịa số liệu, không bịa tính năng/giá/khuyến mãi sản phẩm. Thông tin chưa có → ghi `CẦN CEO XÁC NHẬN`.
 - Tuân thủ quy định quảng cáo (không cam kết quá mức, không so sánh tuyệt đối, không dùng từ ngữ bị cấm trên nền tảng, bản quyền nhạc/hình).
-- Giữ nhất quán thương hiệu: tên sản phẩm, tông giọng, màu sắc, logo.
-- **QUY TẮC BẮT BUỘC VỀ HÌNH ẢNH TRONG BÁO CÁO CEO**: Phải dùng công cụ `generate_image` (dùng ảnh gốc sản phẩm của CEO làm tham chiếu `ImagePaths`) để tạo ra các hình ảnh thực tế, lưu vào thư mục `assets/`, ghi đường dẫn file ảnh vào `Brief_Thiet_Ke` / `Bao_Cao_Cho_CEO` và **đưa trực tiếp các hình ảnh này vào phần Báo Cáo Cho CEO**.
-- **QUY TẮC TỐI ƯU QUOTA VIDEO**: Phòng `VIDEO` **chỉ hoạt động khi CEO có yêu cầu rõ ràng về làm video**. Khi CEO không yêu cầu video, không gọi `invoke_subagent` cho `VIDEO` để tiết kiệm quota, và tại Sheet `Kich_Ban_Dung_Video` chỉ ghi 1 dòng trạng thái: `Chưa kích hoạt (Chỉ hoạt động khi CEO có yêu cầu để tối ưu quota)`.
+- Giữ nhất quán thương hiệu: tên sản phẩm, tông giọng, màu sắc, và **đóng dấu đồng bộ Bộ Nhận Diện Logo `11 SPORT - PICKLEBALL & MORE`** (`top-right`, `W = 19%`, `Margin = 3.0% x 1.6%`) bằng `scripts/stamp_logo.js`.
+- **QUY TẮC BẮT BUỘC VỀ HÌNH ẢNH TRONG BÁO CÁO CEO**: Phải dùng công cụ `generate_image` (dùng ảnh gốc sản phẩm của CEO làm tham chiếu `ImagePaths`) để tạo ra các hình ảnh thực tế, đóng dấu Logo `11 SPORT`, lưu vào thư mục `assets/`, ghi đường dẫn file ảnh vào `Brief_Thiet_Ke` / `Bao_Cao_Cho_CEO` và **đưa trực tiếp các hình ảnh này vào phần Báo Cáo Cho CEO**.
+- **QUY TẮC TỐI ƯU QUOTA VIDEO**: Phòng `VIDEO` **chỉ hoạt động khi CEO có yêu cầu rõ ràng về làm video / chỉnh video**. Khi CEO không yêu cầu video, không gọi `invoke_subagent` cho `VIDEO` để tiết kiệm quota, và tại Sheet `Kich_Ban_Dung_Video` chỉ ghi 1 dòng trạng thái: `Chưa kích hoạt (Chỉ hoạt động khi CEO có yêu cầu để tối ưu quota)`.
 
 ## 2. Định Dạng Xuất 9 Sheets TSV (Import Google Sheets)
 - Mỗi sheet đặt tiêu đề bằng dòng: `### SHEET: <Tên_Sheet>`
