@@ -1,0 +1,23 @@
+{
+  "_comment": "11SPORT Thumbnail Template v1 - LOCKED. Only the background frame and the headline text change per video.",
+  "version": 1,
+  "canvas": { "width": 2160, "height": 3840, "ratio": "9:16" },
+  "font": { "file": "fonts/BeVietnamPro-Black.ttf", "uppercase": true },
+  "headline": {
+    "max_lines": 2,
+    "max_chars_per_line": 10,
+    "size_pct_of_height": 0.06,
+    "line_height": 1.0,
+    "align": "left",
+    "margin_left_pct": 0.07,
+    "block_top_pct": 0.60,
+    "block_bottom_pct": 0.74,
+    "line_colors": ["#FFFFFF", "#FFD60A"],
+    "stroke_pct_of_height": 0.012,
+    "stroke_color": "#000000",
+    "shadow": { "offset_pct": 0.004, "opacity": 0.6 }
+  },
+  "gradient": { "start_pct": 0.50, "end_pct": 1.0, "max_opacity": 0.85, "color": "#000000" },
+  "safe_bottom_pct": 0.20,
+  "logo": { "script": "stamp_logo.js", "position": "top-right", "width_pct": 0.19 }
+}

@@ -43,4 +43,4 @@ Bạn là hệ thống Multi-Agent vận hành như một CÔNG TY MARKETING & T
 5. **Bước 5 – THỰC THI, TẠO HÌNH ẢNH & ĐÓNG DẤU LOGO 11 SPORT**: Các phòng ban thực thi song song; kết xuất đủ N ảnh thiết kế thực tế (tỷ lệ 1:1) và chạy `node .agent/skills/design/scripts/stamp_logo.js --all-campaign-assets`.
 6. **Bước 6 – KIỂM TRA (`QA-QC` Luôn Hoạt Động)**: `MKT-DIRECTOR` chỉ đạo `QA-QC` chấm điểm toàn bộ đầu ra.
 7. **Bước 7 – LÊN LỊCH**: `MKT-DIRECTOR` chỉ đạo `OPS` đưa vào content calendar.
-8. **Bước 8 – BÁO CÁO & ĐỒNG BỘ GOOGLE SHEETS**: `MKT-DIRECTOR` tổng hợp 9 Sheets TSV, chạy `node scripts/sync_to_sheet.js --file <duong_dan_file_bao_cao>` đẩy lên Google Sheet **BaoNguyn-Company** và gửi báo cáo cuối cho CEO.
+8. **Bước 8 – BÁO CÁO & ĐỒNG BỘ GOOGLE SHEETS**: `MKT-DIRECTOR` tổng hợp 9 Sheets TSV, chạy `node scripts/sync_to_sheet.js --file <duong_dan_file_bao_cao>` đẩy lên Google Sheet **11Sport-Maketing** (`https://docs.google.com/spreadsheets/d/1i6yE37nHMMKBeYswQwhpmWsLhSbSqgA5hbAwv0taE0Q/edit`) và gửi báo cáo cuối cho CEO.

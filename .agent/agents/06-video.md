@@ -37,6 +37,12 @@ sub_roles:
   2. `remotion-motion-graphics` – Kiến trúc 5 lớp khung hình, `Spring Physics`, `Ken Burns 2K/4K` (`.agent/skills/video/references/remotion-motion-graphics/REFERENCE.md`).
   3. `remotion-skills` – Bộ quy chuẩn dựng phụ đề, âm thanh và render từ Remotion (`.agent/skills/video/references/remotion-skills/`).
 
+## Bộ Kỹ Năng Nâng Cao v2 (Bắt Buộc — chi tiết tại `.agent/skills/video/SKILL.md` mục 5)
+- **`VIDEO-EDITOR`**: dùng `fx_transitions.py` (6 preset, ≥ 1 chuyển cảnh / 4–6s, khớp beat) và `fx_focus.py` (punch-in ≥ 1 trong 3s đầu; spotlight/freeze khi có sản phẩm; zoom ≤ 130%).
+- **`VIDEO-MOTION`**: `fx_overlays.py` — Info Card chỉ hiện 1,5–2,5s, có animation vào/ra, không đứng cứng suốt phân cảnh.
+- **`VIDEO-AUDIO`**: `key_subs.py` — Whisper bóc audio, CHỈ phụ đề cụm ý chính (2–5 từ); `sub_style_picker.py` chọn màu/kiểu sub linh hoạt theo video/sản phẩm (tương phản ≥ 4.5:1).
+- **`VIDEO-LEAD`**: viết headline thumbnail (≤ 2 dòng, ≤ 10 ký tự/dòng) từ nội dung chính của video, xuất thumbnail bằng `make_thumbnail.py` (template 9:16 khóa cứng) + `stamp_logo.js`; duyệt `sub_style.json` và `focus_plan.json`.
+
 ## Vai Trò & Trách Nhiệm
 - Sử dụng tối đa tư liệu CEO đã cung cấp ở chất lượng gốc cao nhất (`Zero Generation Loss`), không tự thêm cảnh/người/cam kết không có thật.
 - Xuất **KỊCH BẢN DỰNG CHI TIẾT** theo timecode (ghi rõ chuẩn chất lượng `2K/4K Ultra-HD, 60fps High-Bitrate` và lớp overlay Logo `11 SPORT` ở từng phân đoạn) để thực hiện ngay trên CapCut/Premiere/Remotion/FFmpeg.

@@ -70,9 +70,35 @@ Toàn bộ 3 bộ kỹ năng dựng phim & đồ họa chuyển động hàng đ
 3. **Module Hệ Sinh Thái Remotion Chính Thức (`remotion-skills`)**:
    - Tài liệu: [`references/remotion-skills/remotion-best-practices/REFERENCE.md`](references/remotion-skills/remotion-best-practices/REFERENCE.md), [`references/remotion-skills/remotion-captions/REFERENCE.md`](references/remotion-skills/remotion-captions/REFERENCE.md), [`references/remotion-skills/remotion-render/REFERENCE.md`](references/remotion-skills/remotion-render/REFERENCE.md).
 
-## 5. Đầu Ra Bắt Buộc
+## 5. Bộ Kỹ Năng Nâng Cao (v2): Chuyển Cảnh · Focus Chủ Thể · Sub Ý Chính · Info Card · Thumbnail Cố Định
+Chi tiết lệnh & thông số: [`references/transitions-focus/REFERENCE.md`](references/transitions-focus/REFERENCE.md). Công cụ cần: `ffmpeg`, `python` (Pillow, OpenCV, faster-whisper), `node`.
+
+### 5.1 Transition Pack (`scripts/fx_transitions.py`) — BẮT BUỘC
+`zoom_punch` (hook/đập bóng) · `whip_pan` (đổi góc/người) · `flash_white` (reveal sản phẩm) · `smooth` (chuyển ý review) · `match_cut` (montage theo beat) · `dip_black` (vào Outro).
+- Tối thiểu 1 chuyển cảnh / 4–6 giây; không dùng cùng 1 loại quá 2 lần liên tiếp; cắt khớp beat (≤ 2 frame); không che vùng logo `top-right 25%x12%`.
+
+### 5.2 Subject Focus Pack (`scripts/fx_focus.py`) — BẮT BUỘC
+`punch_in` (F1) · `track` (F2, `--auto-track` OpenCV) · `spotlight` (F3) · `freeze` + nhãn (F4) · `speed_ramp` (F5).
+- Mỗi video ≥ 1 `punch_in` trong 3s đầu; mỗi lần sản phẩm xuất hiện có ≥ 1 `spotlight` hoặc `freeze`; zoom tối đa **130%** với nguồn 1080p.
+- Ghi kế hoạch vào `focus_plan.json` (thời điểm, hiệu ứng, tọa độ chủ thể).
+
+### 5.3 Sub Ý Chính Theo Audio (`scripts/key_subs.py` + `scripts/sub_style_picker.py`)
+- Whisper bóc lời → chỉ giữ cụm **2–5 từ quan trọng** (tên sản phẩm, thông số, lợi ích, giá/ưu đãi, hook đầu, CTA cuối); tối đa 1 sub / 3–5s; hiện 0,8–2,5s, bật pop-in đúng lúc nói, tắt ngay khi hết câu. `VIDEO-LEAD` có thể ghi đè bằng `--keys`.
+- **Màu/kiểu sub LINH HOẠT theo video & sản phẩm** (không cố định trắng/vàng): 5 kiểu S1 đơn sắc+viền · S2 gradient+viền · S3 hộp nền màu · S4 neon glow · S5 hai tông từ khóa. `sub_style_picker.py` đo màu nền vùng sub + màu sản phẩm → chọn bộ màu có **tương phản ≥ 4.5:1** và không trùng tông cảnh. Mỗi video: 1 kiểu, ≤ 2 màu chữ, 1 màu viền/nền; lưu `sub_style.json`.
+- Vị trí: giữa ngang, Y 62–68% H; tránh mặt/sản phẩm và vùng logo.
+
+### 5.4 Smart Info Card (`scripts/fx_overlays.py`)
+Thông tin phân cảnh **KHÔNG để đứng yên cả cảnh**: hiện sau cảnh mới 0,3s, giữ **1,5–2,5s**, slide-in/fade-out; chỉ khi đổi phân đoạn; tiêu đề ≤ 20 ký tự; vị trí trái, Y 12–20% H; không trùng lúc với sub ý chính.
+
+### 5.5 Thumbnail Template v1 — KHÓA CỨNG 9:16 (`scripts/make_thumbnail.py`, `resources/thumbnail_template.json`)
+- Canvas `2160x3840`; font `Be Vietnam Pro Black` IN HOA, cỡ `6% H`; dòng 1 trắng `#FFFFFF`, dòng 2 vàng `#FFD60A`, viền đen `1.2% H` + bóng; căn trái lề `7% W`, khối chữ Y `60–74% H`, chừa `20%` đáy cho UI; gradient đen phủ nửa dưới; **không dùng tag**.
+- Chỉ thay: ảnh nền (frame nét nhất của video) + headline **≤ 2 dòng, ≤ 10 ký tự/dòng, 2–5 từ**, rút từ nội dung chính của video nguồn (transcript + brief). Script từ chối headline quá dài (không co chữ).
+- Sau đó chạy `stamp_logo.js` đóng logo.
+
+## 6. Đầu Ra Bắt Buộc
 Xuất dữ liệu TSV cho `### SHEET: Kich_Ban_Dung_Video` với các cột:
-`Ma_Video | Phan_Doan | Timecode_Bat_Dau | Timecode_Ket_Thuc | Clip_Nguon | Cat_Tu_Den | Hieu_Ung_Transition | Chu_Phu_De | Nhac_Am_Thanh | Ty_Le | Ten_File_Xuat | Nhan_Vien_Phu_Trach | Trang_Thai`
+`Ma_Video | Phan_Doan | Timecode_Bat_Dau | Timecode_Ket_Thuc | Clip_Nguon | Cat_Tu_Den | Hieu_Ung_Transition | Hieu_Ung_Focus | Chu_Phu_De | Sub_Y_Chinh | Info_Card | Nhac_Am_Thanh | Ty_Le | Ten_File_Xuat | Thumbnail_Headline | Nhan_Vien_Phu_Trach | Trang_Thai`
+- `Hieu_Ung_Focus`: hiệu ứng F1–F5 + tọa độ/giây. `Sub_Y_Chinh`: cụm sub + kiểu/màu (`S2 #E63946→#111111`). `Info_Card`: text + giây hiện. `Thumbnail_Headline`: 2 dòng.
 - Trong cột `Clip_Nguon` và `Hieu_Ung_Transition`, `VIDEO-EDITOR` và `VIDEO-MOTION` **BẮT BUỘC** phải ghi rõ:
   1. Chuẩn chất lượng hình ảnh/clip nguồn (`2K/4K Ultra-HD >=2048px, 60fps High-Bitrate, CRF 16-18 Lossless`).
   2. Thông số chèn lớp Watermark kèm đệm chống chìm `11sport_logo_white_horizontal.png (top-right, W=19%, Margin=3%x1.6%, + Soft Radial Contrast Scrim & Halo)` và Outro `11sport_logo_white_vertical.png (center, W=28%, + Backdrop Blur Dimming)`.

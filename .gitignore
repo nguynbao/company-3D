@@ -22,3 +22,8 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+
+
+# Large local media renders (>100MB GitHub limit) & temp originals
+assets/videos/*.mp4
+assets/.unstamped_originals/

@@ -463,6 +463,7 @@ if args.count >= 8 && args[1] == "stamp" {
 `;
 
 function ensureSwiftHelper() {
+  if (process.platform === "win32") return;
   let needCompile = !fs.existsSync(SWIFT_BIN_PATH);
   if (!fs.existsSync(SWIFT_HELPER_PATH) || fs.readFileSync(SWIFT_HELPER_PATH, "utf8") !== SWIFT_CODE) {
     fs.writeFileSync(SWIFT_HELPER_PATH, SWIFT_CODE, "utf8");
@@ -495,7 +496,11 @@ function prepareStandardLogoFiles(sourceDownloadDir = "/Users/baonguyenave/Downl
     const srcPath = path.join(sourceDir, found);
     const primaryOut = path.join(LOGO_DIRS[0], item.outName);
 
-    execFileSync(SWIFT_BIN_PATH, ["trim", srcPath, primaryOut], { stdio: "pipe" });
+    if (process.platform === "win32") {
+      execFileSync(process.execPath, [path.join(ROOT_DIR, "scripts", "win_stamp_helper.js"), "trim", srcPath, primaryOut], { stdio: "pipe" });
+    } else {
+      execFileSync(SWIFT_BIN_PATH, ["trim", srcPath, primaryOut], { stdio: "pipe" });
+    }
     for (let i = 1; i < LOGO_DIRS.length; i++) {
       fs.copyFileSync(primaryOut, path.join(LOGO_DIRS[i], item.outName));
     }
@@ -539,10 +544,9 @@ function stampLogoOnImage(imagePath, options = {}) {
   const mode = options.mode || "auto";
   const outputPath = options.outputPath || imagePath;
 
-  const out = execFileSync(
-    SWIFT_BIN_PATH,
-    ["stamp", cleanSourcePath, outputPath, whiteLogo, blackLogo, position, widthRatio, marginRatio, mode],
-    { encoding: "utf8" }
+  const out = (process.platform === "win32"
+    ? execFileSync(process.execPath, [path.join(ROOT_DIR, "scripts", "win_stamp_helper.js"), "stamp", cleanSourcePath, outputPath, whiteLogo, blackLogo, position, widthRatio, marginRatio, mode], { encoding: "utf8" })
+    : execFileSync(SWIFT_BIN_PATH, ["stamp", cleanSourcePath, outputPath, whiteLogo, blackLogo, position, widthRatio, marginRatio, mode], { encoding: "utf8" })
   ).trim();
 
   console.log(`✔ Đã đóng dấu Logo 11 SPORT đồng bộ lên ${path.basename(outputPath)} -> ${out}`);
